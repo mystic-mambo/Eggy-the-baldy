@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EGGY.EXE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --deep: #071b1d;
+    --ink: #0c2a2d;
+    --teal: #1f6f6b;
+    --mint: #9be7c4;
+    --mint-soft: #e6f8ef;
+    --yolk: #ffcc2e;
+    --white: #ffffff;
+    --online: #2fd47a;
+    --pixel: "Press Start 2P", "Courier New", monospace;
+    --mono: "VT323", "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background:
+      radial-gradient(rgba(155, 231, 196, 0.10) 2px, transparent 2px) 0 0 / 28px 28px,
+      var(--deep);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 22px;
+    line-height: 1.25;
+  }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--yolk); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+
+  /* ---------- egg gate ---------- */
+  #gate {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 24px;
+    text-align: center;
+    background:
+      radial-gradient(rgba(155, 231, 196, 0.10) 2px, transparent 2px) 0 0 / 28px 28px,
+      var(--deep);
+  }
+  #gateText { margin: 0; font-family: var(--pixel); font-size: clamp(12px, 3.4vw, 18px); line-height: 1.7; }
+  #egg {
+    padding: 8px 20px;
+    background: none;
+    border: 0;
+    font-size: clamp(96px, 30vw, 160px);
+    line-height: 1;
+  }
+  #egg.wobble { animation: wobble 0.45s; }
+  @keyframes wobble {
+    0%, 100% { transform: rotate(0); }
+    20% { transform: rotate(-12deg); }
+    45% { transform: rotate(10deg); }
+    70% { transform: rotate(-6deg); }
+  }
+  #gateHint { margin: 0; color: var(--mint); font-size: 24px; }
+
+  /* ---------- main card ---------- */
+  #app { padding: 28px 14px 60px; }
+  .card {
+    width: min(560px, 100%);
+    margin: 0 auto;
+    background: var(--white);
+    color: var(--ink);
+    border: 3px solid var(--mint);
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.55);
+  }
+  .tb {
+    padding: 10px 12px;
+    background: linear-gradient(90deg, var(--teal), var(--ink));
+    color: var(--white);
+    font-family: var(--pixel);
+    font-size: 11px;
+  }
+  .who {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-bottom: 3px solid var(--ink);
+  }
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    background: var(--yolk);
+    border: 3px solid var(--ink);
+    font-size: 34px;
+  }
+  .who strong { font-weight: normal; font-family: var(--pixel); font-size: 15px; }
+  .status { display: flex; align-items: center; gap: 8px; margin-top: 6px; color: var(--teal); }
+  .dot { width: 12px; height: 12px; background: var(--online); border: 2px solid var(--ink); }
+
+  .chat {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 220px;
+    padding: 18px 16px;
+    background: var(--mint-soft);
+    cursor: default;
+  }
+  .bubble {
+    max-width: 84%;
+    padding: 8px 12px;
+    border: 3px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+    overflow-wrap: anywhere;
+    font-size: 23px;
+  }
+  .me { align-self: flex-end; background: var(--teal); color: var(--white); }
+  .eggy { align-self: flex-start; background: var(--yolk); color: var(--ink); }
+  .typing { opacity: 0.7; letter-spacing: 3px; }
+
+  .panel { padding: 16px; border-top: 3px solid var(--ink); }
+  .panel h2 {
+    margin: 0 0 12px;
+    font-family: var(--pixel);
+    font-size: 11px;
+    font-weight: normal;
+    color: var(--teal);
+  }
+  #adviceBox { min-height: 76px; margin-bottom: 14px; }
+  #adviceBox .bubble { max-width: 100%; }
+  .hint { margin: 0; color: var(--teal); }
+
+  .btn {
+    padding: 8px 16px;
+    background: var(--yolk);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+    font-size: 22px;
+  }
+  .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+
+  .stats { margin: 0; }
+  .stats div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 2px dotted var(--teal);
+  }
+  .stats dt { color: var(--teal); }
+  .stats dd { margin: 0; text-align: right; }
+
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+    border-top: 3px solid var(--ink);
+  }
+  #sign { font-size: 24px; }
+  #thanksCount { margin-left: 8px; color: var(--teal); }
+
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    z-index: 50;
+    max-width: 90vw;
+    padding: 10px 14px;
+    transform: translateX(-50%);
+    background: var(--yolk);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
+    text-align: center;
+  }
+
+  @media (max-width: 480px) {
+    body { font-size: 20px; }
+    .bubble { font-size: 21px; max-width: 90%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #egg.wobble { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== EGG GATE ===================== -->
+<div id="gate">
+  <p id="gateText"></p>
+  <button id="egg" aria-label="Tap the egg to open the gift"><span id="eggFace">🥚</span></button>
+  <p id="gateHint" aria-live="polite">Tap the egg 3 times</p>
+</div>
+
+<!-- ===================== MAIN ===================== -->
+<main id="app" hidden>
+  <div class="card">
+    <div class="tb" id="winTitle"></div>
+
+    <header class="who">
+      <span class="avatar">🥚</span>
+      <div>
+        <strong id="name"></strong>
+        <div class="status"><i class="dot"></i><span id="statusText">online (always)</span></div>
+      </div>
+    </header>
+
+    <div class="chat" id="chat" aria-live="polite"></div>
+
+    <section class="panel" id="advicePanel" hidden>
+      <h2>advice.txt</h2>
+      <div id="adviceBox"><p class="hint">Press the button to get some advice.</p></div>
+      <button class="btn" id="adviceBtn">Ask for advice</button>
+    </section>
+
+    <section class="panel" id="statusPanel" hidden>
+      <h2>status.log</h2>
+      <dl class="stats" id="stats"></dl>
+    </section>
+
+    <footer id="foot" hidden>
+      <span id="sign"></span>
+      <span><button class="btn" id="thanksBtn">Send thanks</button><span id="thanksCount"></span></span>
+    </footer>
+  </div>
+</main>
+
+<div id="toast" role="status" hidden></div>
+
+<script>
+/* ==========================================================
+   EDIT THIS BLOCK: everything the page says lives here.
+   Change the words between the quote marks, and add or remove
+   lines. Keep the quotes and the commas.
+   ========================================================== */
+const CONFIG = {
+  title: "EGGY.EXE",
+  to: "Eggy",
+  from: "Mambo",
+  gate: "A gift for Eggy",
+
+  // Each line shows up as a chat message from you.
+  messages: [
+    "Hey Eggy.",
+    "I made you a little site, because you deserve one.",
+    "You're a really, really good dude.",
+    "Your advice is always solid, and you're there every time I need you.",
+    "That means a lot to me. Thanks for being that guy."
+  ],
+
+  // Replace these with real advice Eggy has given you. Each click of the button shows one.
+  advice: [
+    "Sleep on it before you decide.",
+    "Don't send that message while you're mad.",
+    "Take a break. The problem will still be there.",
+    "Be honest, even when it's awkward.",
+    "You're doing better than you think."
+  ],
+
+  // Shown as a list of label and value pairs.
+  status: [
+    { label: "Status", value: "online (always)" },
+    { label: "Advice quality", value: "10/10" },
+    { label: "Response time", value: "instant" },
+    { label: "Legend level", value: "max" }
+  ]
+};
+
+/* ==========================================================
+   Below here you don't need to change anything.
+   ========================================================== */
+const $ = (sel, el = document) => el.querySelector(sel);
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+document.title = CONFIG.title;
+$("#winTitle").textContent = CONFIG.title;
+$("#name").textContent = CONFIG.to;
+$("#gateText").textContent = CONFIG.gate;
+$("#sign").textContent = "- " + CONFIG.from;
+$("#statusText").textContent = (CONFIG.status.find(s => s.label === "Status") || {}).value || "online (always)";
+
+CONFIG.status.forEach(s => {
+  const row = document.createElement("div");
+  row.innerHTML = "<dt></dt><dd></dd>";
+  $("dt", row).textContent = s.label;
+  $("dd", row).textContent = s.value;
+  $("#stats").appendChild(row);
+});
+
+/* ---------- egg gate ---------- */
+let taps = 0;
+const egg = $("#egg");
+egg.addEventListener("click", () => {
+  taps++;
+  if (taps < 3) {
+    const left = 3 - taps;
+    $("#gateHint").textContent = left + (left === 1 ? " more tap" : " more taps");
+    egg.classList.remove("wobble");
+    void egg.offsetWidth;
+    egg.classList.add("wobble");
+  } else {
+    egg.disabled = true;
+    $("#eggFace").textContent = "🐣";
+    $("#gateHint").textContent = "...";
+    setTimeout(openApp, reduce ? 0 : 900);
+  }
+});
+
+function openApp() {
+  $("#gate").hidden = true;
+  $("#app").hidden = false;
+  runChat();
+}
+
+/* ---------- chat sequence ---------- */
+let skip = false;
+$("#chat").addEventListener("click", () => { skip = true; });
+const wait = ms => (skip || reduce) ? Promise.resolve() : new Promise(r => setTimeout(r, ms));
+
+function bubble(text, cls) {
+  const b = document.createElement("div");
+  b.className = "bubble " + cls;
+  b.textContent = text;
+  $("#chat").appendChild(b);
+  b.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" });
+  return b;
+}
+
+async function runChat() {
+  for (const msg of CONFIG.messages) {
+    const b = bubble("...", "me typing");
+    await wait(Math.min(500 + msg.length * 18, 1500));
+    b.textContent = msg;
+    b.classList.remove("typing");
+    await wait(350);
+  }
+  $("#advicePanel").hidden = false;
+  $("#statusPanel").hidden = false;
+  $("#foot").hidden = false;
+}
+
+/* ---------- advice ---------- */
+let lastAdvice = -1;
+$("#adviceBtn").addEventListener("click", () => {
+  const n = CONFIG.advice.length;
+  let i;
+  do { i = Math.floor(Math.random() * n); } while (i === lastAdvice && n > 1);
+  lastAdvice = i;
+  const box = $("#adviceBox");
+  box.innerHTML = "";
+  const b = document.createElement("div");
+  b.className = "bubble eggy";
+  b.textContent = CONFIG.advice[i];
+  box.appendChild(b);
+});
+
+/* ---------- thanks counter ---------- */
+let thanks = 0;
+let toastTimer;
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 3000);
+}
+$("#thanksBtn").addEventListener("click", () => {
+  thanks++;
+  $("#thanksCount").textContent = "Thanks sent: " + thanks;
+  if (thanks === 10) toast("Ok Eggy, that's enough thanks. (It's never enough.)");
+});
+</script>
+</body>
+</html>
